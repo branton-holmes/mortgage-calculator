@@ -1,0 +1,14 @@
+@font-face {
+    font-family: "museo-sans-300";
+    src: url("/museo-sans-300.bdb59b80.otf");
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "museo-sans-500";
+    src: url("/museo-sans-500.62c01351.otf");
+    font-style: medium;
+    font-weight: 500;
+    font-display: swap;
+  }
