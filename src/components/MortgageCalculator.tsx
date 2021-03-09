@@ -27,9 +27,6 @@ const createSavingsPeriodOptions = (maxLength: number) => {
 };
 
 export const MortgageCalculator = () => {
-  const { register, handleSubmit, watch, trigger, errors } = useForm({
-    reValidateMode: "onChange",
-  });
   const [payment, setPayment] = useState("");
   const [federalInterestRate, setFederalInterestRate] = useState(0);
   const onSubmit = async (data) => {
@@ -43,11 +40,25 @@ export const MortgageCalculator = () => {
   useEffect(() => {
     loadFederalInterestRate();
   }, []);
+
+  const { register, handleSubmit, watch, trigger, errors } = useForm({
+    mode: "onBlur",
+    shouldFocusError: true,
+    defaultValues: {
+      mortgageAmount: '',
+      paymentPeriod: '',
+      interestRate: federalInterestRate,
+      monthlySavings: '',
+      savingsPeriod: '',
+    }
+  });
+
   const watchAllFields = watch();
 
   useEffect(() => {
+    console.log(errors);
     const hasNecessaryValues =
-      watchAllFields.mortgageAmount > 0 && watchAllFields.paymentPeriod > 0;
+      parseInt(watchAllFields.mortgageAmount) > 0 && parseInt(watchAllFields.paymentPeriod) > 0;
     if (Object.keys(errors).length === 0 && hasNecessaryValues) {
       const newPayment = calculatePayment(watchAllFields);
       setPayment(`$${newPayment}`);
@@ -84,8 +95,11 @@ export const MortgageCalculator = () => {
               ref={register({ required: true, min: 1000 })}
             />
           </InputGroup>
-          {errors.mortgageAmount && (
-            <Text>{errors.mortgageAmount.message}</Text>
+          {errors.mortgageAmount && errors.mortgageAmount.type === "required" && (
+            <Text color="#cc3300">Mortgage amount is required</Text>
+          )}
+          {errors.mortgageAmount && errors.mortgageAmount.type === "min" && (
+            <Text color="#cc3300">Mortgage amount must be at least $1000</Text>
           )}
         </Box>
       </Grid>
@@ -106,7 +120,7 @@ export const MortgageCalculator = () => {
             <option value={30}>30 years</option>
             <option value={50}>50 years</option>
           </Select>
-          {errors.paymentPeriod && <Text>{errors.paymentPeriod.message}</Text>}
+          {errors.paymentPeriod && <Text color="#cc3300">{errors.paymentPeriod.message}</Text>}
         </Box>
         <Box>
           <Text mb="8px">Interest Rate</Text>
@@ -124,7 +138,7 @@ export const MortgageCalculator = () => {
               disabled
             />
           </InputGroup>
-          {errors.interestRate && <Text>{errors.interestRate.message}</Text>}
+          {errors.interestRate && <Text color="#cc3300">{errors.interestRate.message}</Text>}
         </Box>
       </Grid>
       <Text mt="2em" mb="1em">
@@ -148,9 +162,12 @@ export const MortgageCalculator = () => {
               type="number"
               name="monthlySavings"
               placeholder="Monthly savings"
-              ref={register}
+              ref={register({ min: 1 })}
             />
           </InputGroup>
+          {errors.monthlySavings && errors.monthlySavings.type === "min" && (
+            <Text color="#cc3300">Monthly savings must be greater than 0</Text>
+          )}
         </Box>
         <Box>
           <Text mb="8px">Months of saving</Text>
